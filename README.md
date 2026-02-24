@@ -13,5 +13,5 @@ This project is currently in its **early development phase** — the goal is to 
 
 ### Clone the Repository
 ```bash
-git clone https://github.com/Rahul-02825/PrismX.git
-cd PrismX
+git clone https://github.com/Rahul-02825/Aegis.git
+cd Aegis
