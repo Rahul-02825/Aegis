@@ -1,4 +1,4 @@
-# PrismX
+# Aegis
 
 A **reverse proxy server** written in [Go](https://go.dev/).  
 This project is currently in its **early development phase** — the goal is to build a lightweight reverse proxy with pluggable middlewares.
@@ -13,5 +13,5 @@ This project is currently in its **early development phase** — the goal is to 
 
 ### Clone the Repository
 ```bash
-git clone https://github.com/Rahul-02825/PrismX.git
-cd PrismX
+git clone https://github.com/Rahul-02825/Aegis.git
+cd Aegis
