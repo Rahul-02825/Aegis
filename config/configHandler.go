@@ -6,19 +6,19 @@ package config
 type upstream struct {
 	name     string
 	lbMethod string
-	servers  []upstreamservers
+	servers  map[string]upstreamservers
 	replicas int
 }
 
 type config struct {
 	upstream upstream
 	balancer  string
-	replicas  int
 	server []server
 }
 type upstreamservers struct{
 	Address string
 	weight int
+	replicas  int
 	maxFails int
 	FailTimeout int
 	down bool
@@ -34,19 +34,21 @@ func LoadConfig() (*config, error) {
 		upstream: upstream{
 				name:     "Auth service",
 				lbMethod: "consistent-hash",
-				replicas: 3,
-				servers:  []upstreamservers{
-					{
+				
+				servers:  map[string]upstreamservers{
+					"auth":{
 						Address:"http://localhost:9000/auth",
 						weight:10,
 						maxFails: 2,
+						replicas: 3,
 						FailTimeout: 2,
 						down:false,
 					},
-					{
+					"order":{
 						Address:"http://localhost:9001/order",
 						weight:10,
 						maxFails: 2,
+						replicas: 3,
 						FailTimeout: 2,
 						down:false,
 					},
@@ -59,6 +61,6 @@ func LoadConfig() (*config, error) {
 }
 
 // methods are public to export 
-func (c *config) GetServers() []upstreamservers {
+func (c *config) GetServers() map[string]upstreamservers {
 	return c.upstream.servers
 }

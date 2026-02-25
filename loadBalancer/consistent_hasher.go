@@ -9,7 +9,6 @@ import(
 
 )
 
-
 type ConsistentHash struct{
 	uniqueName string
 	sorted_ring []uint64
@@ -68,7 +67,6 @@ func (chash *ConsistentHash) removeServer(server string) {
 		logger.Instance.Error("No such server exist - " + server)
 	}
 }
-
 
 func (chash * ConsistentHash) getServer(request string) string{
 	request_key := chash.getEncode(request)

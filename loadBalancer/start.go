@@ -25,6 +25,7 @@ func StartLoadBalancer() {
 	}
 
 	servers := cfg.GetServers()
+	fmt.Println(servers["auth"])
 	for _, server := range servers {
 		fmt.Println(server.Address)
 		lb.insertServer(server.Address)

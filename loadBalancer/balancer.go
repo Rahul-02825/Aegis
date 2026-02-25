@@ -1,7 +1,6 @@
 package loadBalancer
 
 
-
 // factory design pattern implementation for the balancers
 type loadbalancer interface{
 	insertServer(server string)
