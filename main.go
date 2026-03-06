@@ -1,17 +1,19 @@
 package main
 
 import (
-	"time"
-	"PrismX/logger"
-	"PrismX/loadBalancer"
-	"PrismX/internal/database"
 	"PrismX/internal/controller"
+	"PrismX/internal/database"
+	"PrismX/loadBalancer"
+	"PrismX/logger"
 	"net/http"
-
+	"time"
+	"github.com/gorilla/mux"
 )
 
 func main() {
 
+	proxy_mux := mux.NewRouter() 
+	internal_mux := mux.NewRouter()
 	log := logger.InitLogger("app.log")
 
 	defer log.Close()
@@ -24,17 +26,31 @@ func main() {
 	go loadBalancer.StartLoadBalancer()
 
 	log.Info("Setting up HTTP routes")
-	http.HandleFunc("/createuser",controller.CreateUser)
-	http.HandleFunc("/getusers",controller.GetUsers)
-	http.HandleFunc("/getuser",controller.GetUser)
-	http.HandleFunc("/updateuser",controller.UpdateUser)
+	proxy_mux.HandleFunc("/createuser",controller.CreateUser)
+	proxy_mux.HandleFunc("/getusers",controller.GetUsers)
+	proxy_mux.HandleFunc("/getuser",controller.GetUser)
+	proxy_mux.HandleFunc("/updateuser",controller.UpdateUser)
 	// http.HandleFunc("/deleteuser",controller.DeleteUser)
+	internal_mux.HandleFunc("/start",func(w http.ResponseWriter, r *http.Request){
+		w.Write([]byte("Internal server is running"))
+	})
 	
 	for i := 0; i < 5; i++ {
 		log.Info("Main thread working...")
 		time.Sleep(1 * time.Second)
 	}
-
+	proxy_server := &http.Server{
+		Addr:":8080",
+		Handler: proxy_mux,
+	}
+	internal_server := &http.Server{
+		Addr : ":8081",
+		Handler : internal_mux,
+	}
 	log.Info("Proxy server is running on port :8080")
-	http.ListenAndServe(":8080", nil)
+	
+	go internal_server.ListenAndServe()
+	proxy_server.ListenAndServe()
+	
+
 }
