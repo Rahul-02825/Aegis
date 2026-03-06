@@ -2,7 +2,6 @@ package main
 
 import (
 	"time"
-
 	"PrismX/logger"
 	"PrismX/loadBalancer"
 	"PrismX/internal/database"
@@ -17,13 +16,14 @@ func main() {
 
 	defer log.Close()
 
-	log.Info("\nApplication started")
+	log.Info("Application started")
 
 	log.Info("Running database connection")
 	database.ConnectDatabase()
 
 	go loadBalancer.StartLoadBalancer()
 
+	log.Info("Setting up HTTP routes")
 	http.HandleFunc("/createuser",controller.CreateUser)
 	http.HandleFunc("/getusers",controller.GetUsers)
 	http.HandleFunc("/getuser",controller.GetUser)

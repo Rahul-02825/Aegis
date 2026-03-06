@@ -135,3 +135,4 @@ func UpdateUser(res http.ResponseWriter, req *http.Request) {
 	}
 	json.NewEncoder(res).Encode(result)
 }
+
