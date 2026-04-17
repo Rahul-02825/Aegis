@@ -5,8 +5,8 @@ import (
 	"os"
 	"PrismX/logger"
 	"github.com/joho/godotenv"
-	"go.mongodb.org/mongo-driver/v2/mongo"
-	"go.mongodb.org/mongo-driver/v2/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var (
@@ -33,7 +33,7 @@ func ConnectDatabase() {
 	opts := options.Client().ApplyURI(uri).SetServerAPIOptions(serverAPI)
 
 	var err error
-	client, err = mongo.Connect(opts)
+	client, err = mongo.Connect(context.Background(), opts)
 	if err != nil {
 		logger.Instance.Error("Mongo connect failed: "+ err.Error())
 	}

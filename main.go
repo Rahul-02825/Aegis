@@ -2,11 +2,13 @@ package main
 
 import (
 	// "PrismX/internal/controller"
+	"PrismX/config"
 	"PrismX/internal/controller"
 	"PrismX/internal/database"
 	"PrismX/loadBalancer"
 	"PrismX/logger"
 	"PrismX/proxy"
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -49,8 +51,14 @@ func main() {
 		Handler : internal_mux,
 	}
 	
-	
-	go internal_server.ListenAndServe()
+	cg ,err := config.DB_config()
+	if err != nil {
+		log.Error("Error loading config: " + err.Error())
+		return
+	}
+	log.Info("Loaded config from DB successfully")
+	fmt.Printf("Config: %+v\n", cg)
+	go internal_server.ListenAndServe()	
 	// proxy_server.ListenAndServe()
 	log.Info("Proxy server is running on port :8080")
 	proxy.StartProxy()

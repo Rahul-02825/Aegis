@@ -1,7 +1,13 @@
 package config
 
 import (
-    "sync"
+	"PrismX/internal/database"
+	"PrismX/internal/models"
+	"context"
+	"sync"
+	"time"
+
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 // attributes are private to struct
@@ -76,6 +82,61 @@ func LoadConfig() (*config, error) {
 
 	return cfg, nil
 }
+
+func DB_config() (*config, error) {
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var dbConfig models.Config
+
+	err := database.ConfigCollection.FindOne(ctx, bson.M{}).Decode(&dbConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	cfg := convertToRuntimeConfig(dbConfig)
+
+	return cfg, nil
+}
+
+func convertToRuntimeConfig(db models.Config) *config {
+
+	upstreamMap := make(map[string]upstreamservers)
+
+	for name, up := range db.Upstreams {
+
+		var addresses []string
+
+		for _, s := range up.Servers {
+			if s.Down {
+				continue
+			}
+			addresses = append(addresses, s.Address)
+		}
+
+		upstreamMap[name] = upstreamservers{
+			Address:     addresses,
+			lbmethod:    up.LBMethod,
+			weight:      up.Servers[0].Weight,
+			maxFails:    up.Servers[0].MaxFails,
+			replicas:    3, // or derive later
+			FailTimeout: 2, // convert from string later
+			down:        false,
+		}
+	}
+
+	return &config{
+		upstream: upstream{
+			servers: upstreamMap,
+		},
+		server: server{
+			serverName: db.Servers[0].ServerName,
+			count:      len(db.Servers),
+		},
+	}
+}
+
 
 // methods are public to export 
 func (c *config) GetServers() map[string]upstreamservers {
