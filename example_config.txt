@@ -1,0 +1,61 @@
+{
+  "upstreams": {
+    "auth": {
+      "name": "auth",
+      "lb_method": "consistent-hash",
+      "zone": "auth_zone",
+      "servers": [
+        {
+          "address": "http://localhost:9000",
+          "weight": 10,
+          "max_fails": 2,
+          "fail_timeout": "2s",
+          "down": false
+        },
+        {
+          "address": "http://localhost:9001",
+          "weight": 10,
+          "max_fails": 2,
+          "fail_timeout": "2s",
+          "down": false
+        }
+      ]
+    },
+    "order": {
+      "name": "order",
+      "lb_method": "consistent-hash",
+      "zone": "order_zone",
+      "servers": [
+        {
+          "address": "http://localhost:9002"
+        },
+        {
+          "address": "http://localhost:9003"
+        }
+      ]
+    }
+  },
+  "servers": [
+    {
+      "server_name": "RetailService",
+      "listen": 8080,
+      "ssl": false,
+      "locations": [
+        {
+          "path": "/auth",
+          "proxy_pass": "auth"
+        },
+        {
+          "path": "/order",
+          "proxy_pass": "order"
+        }
+      ]
+    }
+  ],
+  "global": {
+    "keepalive_timeout": "65s",
+    "client_max_body_size": "10m",
+    "access_log": "/var/log/access.log",
+    "error_log": "/var/log/error.log"
+  }
+}

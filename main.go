@@ -2,12 +2,14 @@ package main
 
 import (
 	// "PrismX/internal/controller"
+	"PrismX/internal/controller"
 	"PrismX/internal/database"
 	"PrismX/loadBalancer"
 	"PrismX/logger"
-	"net/http"
-	"github.com/gorilla/mux"
 	"PrismX/proxy"
+	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -35,6 +37,7 @@ func main() {
 	internal_mux.HandleFunc("/start",func(w http.ResponseWriter, r *http.Request){
 		w.Write([]byte("Internal server is running"))
 	})
+	internal_mux.HandleFunc("/createConfig",controller.CreateConfig)
 	
 	
 	// proxy_server := &http.Server{
@@ -50,7 +53,6 @@ func main() {
 	go internal_server.ListenAndServe()
 	// proxy_server.ListenAndServe()
 	log.Info("Proxy server is running on port :8080")
-
 	proxy.StartProxy()
 	
 }
