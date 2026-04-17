@@ -43,8 +43,8 @@ func LoadConfig() (*config, error) {
 				servers: map[string]upstreamservers{
 					"auth": {
 						Address: []string{
-							"http://localhost:9000/auth",
-							"http://localhost:9001/auth",
+							"http://localhost:9000",
+							"http://localhost:9001",
 						},
 						lbmethod: "consistent-hash",
 						weight:      10,
@@ -55,8 +55,8 @@ func LoadConfig() (*config, error) {
 					},
 					"order": {
 						Address: []string{
-							"http://localhost:9002/auth",
-							"http://localhost:9003/auth",
+							"http://localhost:9002",
+							"http://localhost:9003",
 						},
 						lbmethod: "consistent-hash",
 						weight:      10,

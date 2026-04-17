@@ -68,7 +68,7 @@ func (chash *ConsistentHash) removeServer(server string) {
 	}
 }
 
-func (chash * ConsistentHash) getServer(request string) string{
+func (chash * ConsistentHash) GetServer(request string) string{
 	request_key := chash.getEncode(request)
 	
 	// search based on binary search on the hash ring to get the server on clockwise
