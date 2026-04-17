@@ -1,3 +1,6 @@
+
+-------------- Create config ---------------
+
 {
   "upstreams": {
     "auth": {
@@ -57,5 +60,23 @@
     "client_max_body_size": "10m",
     "access_log": "/var/log/access.log",
     "error_log": "/var/log/error.log"
+  }
+}
+
+------------update config--------------
+
+{
+  "upstreams.added_server": {
+    "name": "payment",
+    "lb_method": "consistent-hash",
+    "zone": "payment_zone",
+    "servers": [
+      {
+        "address": "http://localhost:9010"
+      },
+      {
+        "address": "http://localhost:9011"
+      }
+    ]
   }
 }

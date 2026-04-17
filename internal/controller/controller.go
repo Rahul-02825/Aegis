@@ -6,7 +6,7 @@ import (
 	"PrismX/logger"
 	"context"
 	"encoding/json"
-	"fmt"
+	// "fmt"
 	"net/http"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -14,7 +14,6 @@ import (
 
 // CreateConfig inserts a new Config document
 func CreateConfig(res http.ResponseWriter, req *http.Request) {
-	fmt.Println(req.Method)
 	if req.Method != http.MethodPost {
 		http.Error(res, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return

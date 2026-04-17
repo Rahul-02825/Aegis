@@ -30,16 +30,21 @@ func main() {
 	loadBalancer.InitLoadBalancer()
 	logger.Instance.Info("Initialized load balancers")
 
+	// ------------------------------ Setting up HTTP routes -----------------------------
+
 	log.Info("Setting up HTTP routes")
-	// proxy_mux.HandleFunc("/createuser",controller.CreateUser)
-	// proxy_mux.HandleFunc("/getusers",controller.GetUsers)
-	// proxy_mux.HandleFunc("/getuser",controller.GetUser)
-	// proxy_mux.HandleFunc("/updateuser",controller.UpdateUser)
-	// // http.HandleFunc("/deleteuser",controller.DeleteUser)
-	internal_mux.HandleFunc("/start",func(w http.ResponseWriter, r *http.Request){
-		w.Write([]byte("Internal server is running"))
-	})
+
+	// ----------------------------- Internal server routes ------------------------------
+	// config routes
 	internal_mux.HandleFunc("/createConfig",controller.CreateConfig)
+	internal_mux.HandleFunc("/getConfigs",controller.GetConfigs)
+	internal_mux.HandleFunc("/updateConfig",controller.UpdateConfig)
+
+	// user routes
+	internal_mux.HandleFunc("/createuser",controller.CreateUser)
+	internal_mux.HandleFunc("/getusers",controller.GetUsers)
+	internal_mux.HandleFunc("/getuser",controller.GetUser)
+	internal_mux.HandleFunc("/updateuser",controller.UpdateUser)
 	
 	
 	// proxy_server := &http.Server{
@@ -62,5 +67,4 @@ func main() {
 	// proxy_server.ListenAndServe()
 	log.Info("Proxy server is running on port :8080")
 	proxy.StartProxy()
-	
 }

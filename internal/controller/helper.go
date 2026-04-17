@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"PrismX/internal/database"
 	"PrismX/logger"
-	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+
 )
 
 
@@ -14,10 +16,13 @@ func buildIDFilter(id string) bson.M {
 	if id == "" {
 		return bson.M{}
 	}
-	if objID, err := bson.ObjectIDFromHex(id); err == nil {
-		return bson.M{"_id": objID}
+
+	objID, err := primitive.ObjectIDFromHex(id) // ✅ FIX
+	if err != nil {
+		return bson.M{}
 	}
-	return bson.M{"_id": id}
+
+	return bson.M{"_id": objID}
 }
 
 // Ensure database collections are initialized to avoid nil-pointer panics
