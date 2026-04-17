@@ -19,9 +19,9 @@ var (
 
 // InitLogger initializes the logger (singleton)
 func InitLogger(filename string) *Logger {
-	logpath := "/home/rahul/Documents/projects/PrismX/logs/app.log"
+	logpath := "./logs/app.log"
 	// Ensure parent directory exists
-	err := os.MkdirAll("/home/rahul/Documents/projects/PrismX/logs", os.ModePerm)
+	err := os.MkdirAll("./logs", os.ModePerm)
 	if err != nil {
 		panic(err)
 	}

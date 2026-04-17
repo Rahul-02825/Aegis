@@ -10,39 +10,52 @@ import (
 func StartLoadBalancer() {
 	logger.Instance.Info("Starting load balancer")
 
+	// Load servers from config
+	logger.Instance.Info("Trying fetch Config:Start.go")
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		logger.Instance.Error("Failed to load config:Start.go")
+		return
+	}
+	logger.Instance.Info("Config fetched Successfully:Start.go")
+
 	// Factory decides which algorithm to use
-	lb,err:= balancerFactory("consistent-hash")
+
+	balancers := make(map[string]Loadbalancer)
+	servers := cfg.GetServers()
+
+	for service_name, upstream := range servers {
+
+		service_lb := cfg.GetLbtype(service_name)
+		lb, _ := balancerFactory(service_lb)
+
+		for _, addr := range upstream.Address {
+			lb.insertServer(addr) // add servers into SAME ring
+			fmt.Println(addr)
+		}
+
+		balancers[service_name] = lb
+	}
+
 	// if err != nil {
 	// 	log.Instance.Error(err.Error())
 	// 	return
 	// }
 
-	// Load servers from config
-	cfg, err := config.LoadConfig()
-	if err != nil {
-		logger.Instance.Error("failed to load config")
-		return
-	}
-
-	servers := cfg.GetServers()
-	fmt.Println(servers["auth"])
-	for _, server := range servers {
-		fmt.Println(server.Address)
-		lb.insertServer(server.Address)
-	}
 
 	// Example requests 
-	reqs := []string{"request1", "request2", "request3"}
+	reqs := []string{"request1", "request2", "request3","fdifskdfjsdjf"}
 
 	for _, r := range reqs {
-		server := lb.getServer(r)
+		server := balancers["auth"].getServer(r)
 		fmt.Printf("Request %s → %s\n", r, server)
 	}
 
 	// Dynamic removal example
-	lb.removeServer("server2")
+	balancers["auth"].removeServer("server2")
 	logger.Instance.Warn("server2 removed")
 
 	fmt.Println("After removal:")
-	fmt.Println(lb.getServer("request1"))
+	fmt.Println(balancers["auth"].getServer("request1"))
 }
+

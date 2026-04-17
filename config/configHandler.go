@@ -1,22 +1,24 @@
 package config
 
+import (
+    "sync"
+)
 
 // attributes are private to struct
 // configs has to be added later via db
 type upstream struct {
-	name     string
-	lbMethod string
 	servers  map[string]upstreamservers
-	replicas int
 }
 
 type config struct {
 	upstream upstream
 	balancer  string
-	server []server
+	server server
 }
+
 type upstreamservers struct{
-	Address string
+	Address []string
+	lbmethod string
 	weight int
 	replicas  int
 	maxFails int
@@ -26,41 +28,64 @@ type upstreamservers struct{
 
 type server struct{
 	serverName string
+	count int
 }
+
+var cfg *config
+var once sync.Once
 
 // Dummy configuration for now
 func LoadConfig() (*config, error) {
-	return &config{
-		upstream: upstream{
-				name:     "Auth service",
-				lbMethod: "consistent-hash",
-				
-				servers:  map[string]upstreamservers{
-					"auth":{
-						Address:"http://localhost:9000/auth",
-						weight:10,
-						maxFails: 2,
-						replicas: 3,
+
+	once.Do(func() {
+		cfg = &config{		
+			upstream: upstream{
+				servers: map[string]upstreamservers{
+					"auth": {
+						Address: []string{
+							"http://localhost:9000/auth",
+							"http://localhost:9001/auth",
+						},
+						lbmethod: "consistent-hash",
+						weight:      10,
+						maxFails:    2,
+						replicas:    3,
 						FailTimeout: 2,
-						down:false,
+						down:        false,
 					},
-					"order":{
-						Address:"http://localhost:9001/order",
-						weight:10,
-						maxFails: 2,
-						replicas: 3,
+					"order": {
+						Address: []string{
+							"http://localhost:9002/auth",
+							"http://localhost:9003/auth",
+						},
+						lbmethod: "consistent-hash",
+						weight:      10,
+						maxFails:    2,
+						replicas:    3,
 						FailTimeout: 2,
-						down:false,
+						down:        false,
 					},
 				},
 			},
-		server:[]server{
-			{serverName:"RetailService"},
-		},
-	}, nil
+			server: server{
+				serverName: "RetailService",
+				count:2,
+			},
+		}
+	})
+
+	return cfg, nil
 }
 
 // methods are public to export 
 func (c *config) GetServers() map[string]upstreamservers {
 	return c.upstream.servers
+}
+
+func(c *config) GetServerCount() int{
+	return c.server.count
+}
+
+func(c * config) GetLbtype(service_name string) string{
+	return c.upstream.servers[service_name].lbmethod
 }
