@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // attributes are private to struct
@@ -16,7 +17,7 @@ type upstream struct {
 	servers  map[string]upstreamservers
 }
 
-type config struct {
+type Configs struct {
 	upstream upstream
 	balancer  string
 	server server
@@ -37,60 +38,68 @@ type server struct{
 	count int
 }
 
-var cfg *config
+var cfg *Configs
 var once sync.Once
 
 // Dummy configuration for now
-func LoadConfig() (*config, error) {
+// func LoadConfig() (*config, error) {
 
-	once.Do(func() {
-		cfg = &config{		
-			upstream: upstream{
-				servers: map[string]upstreamservers{
-					"auth": {
-						Address: []string{
-							"http://localhost:9000",
-							"http://localhost:9001",
-						},
-						lbmethod: "consistent-hash",
-						weight:      10,
-						maxFails:    2,
-						replicas:    3,
-						FailTimeout: 2,
-						down:        false,
-					},
-					"order": {
-						Address: []string{
-							"http://localhost:9002",
-							"http://localhost:9003",
-						},
-						lbmethod: "consistent-hash",
-						weight:      10,
-						maxFails:    2,
-						replicas:    3,
-						FailTimeout: 2,
-						down:        false,
-					},
-				},
-			},
-			server: server{
-				serverName: "RetailService",
-				count:2,
-			},
-		}
-	})
+// 	once.Do(func() {
+// 		cfg = &config{		
+// 			upstream: upstream{
+// 				servers: map[string]upstreamservers{
+// 					"auth": {
+// 						Address: []string{
+// 							"http://localhost:9000",
+// 							"http://localhost:9001",
+// 						},
+// 						lbmethod: "consistent-hash",
+// 						weight:      10,
+// 						maxFails:    2,
+// 						replicas:    3,
+// 						FailTimeout: 2,
+// 						down:        false,
+// 					},
+// 					"order": {
+// 						Address: []string{
+// 							"http://localhost:9002",
+// 							"http://localhost:9003",
+// 						},
+// 						lbmethod: "consistent-hash",
+// 						weight:      10,
+// 						maxFails:    2,
+// 						replicas:    3,
+// 						FailTimeout: 2,
+// 						down:        false,
+// 					},
+// 				},
+// 			},
+// 			server: server{
+// 				serverName: "RetailService",
+// 				count:2,
+// 			},
+// 		}
+// 	})
 
-	return cfg, nil
-}
+// 	return cfg, nil
+// }
 
-func DB_config() (*config, error) {
+func LoadConfig(id string) (*Configs, error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	var dbConfig models.Config
 
-	err := database.ConfigCollection.FindOne(ctx, bson.M{}).Decode(&dbConfig)
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+
+	err = database.ConfigCollection.
+		FindOne(ctx, bson.M{"_id": objID}).
+		Decode(&dbConfig)
+
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +109,7 @@ func DB_config() (*config, error) {
 	return cfg, nil
 }
 
-func convertToRuntimeConfig(db models.Config) *config {
+func convertToRuntimeConfig(db models.Config) *Configs {
 
 	upstreamMap := make(map[string]upstreamservers)
 
@@ -126,7 +135,7 @@ func convertToRuntimeConfig(db models.Config) *config {
 		}
 	}
 
-	return &config{
+	return &Configs{
 		upstream: upstream{
 			servers: upstreamMap,
 		},
@@ -139,14 +148,14 @@ func convertToRuntimeConfig(db models.Config) *config {
 
 
 // methods are public to export 
-func (c *config) GetServers() map[string]upstreamservers {
+func (c *Configs) GetServers() map[string]upstreamservers {
 	return c.upstream.servers
 }
 
-func(c *config) GetServerCount() int{
+func(c *Configs) GetServerCount() int{
 	return c.server.count
 }
 
-func(c * config) GetLbtype(service_name string) string{
+func(c * Configs) GetLbtype(service_name string) string{
 	return c.upstream.servers[service_name].lbmethod
 }

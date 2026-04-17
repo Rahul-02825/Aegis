@@ -8,7 +8,7 @@ import (
 	"PrismX/loadBalancer"
 	"PrismX/logger"
 	"PrismX/proxy"
-	"fmt"
+	// "fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -26,8 +26,17 @@ func main() {
 
 	log.Info("Running database connection")
 	database.ConnectDatabase()
+
+	log.Info("Initialize configurations")
+
+	cfg,err:=config.LoadConfig("69e275e4bf8504b6b004cf0b")
+	if err != nil {
+		log.Error("Error loading config: " + err.Error())
+		return
+	}
+	log.Info("Config loaded successfully")
 	
-	loadBalancer.InitLoadBalancer()
+	loadBalancer.InitLoadBalancer(cfg)
 	logger.Instance.Info("Initialized load balancers")
 
 	// ------------------------------ Setting up HTTP routes -----------------------------
@@ -56,15 +65,15 @@ func main() {
 		Handler : internal_mux,
 	}
 	
-	cg ,err := config.DB_config()
-	if err != nil {
-		log.Error("Error loading config: " + err.Error())
-		return
-	}
+	// // cg ,err := config.DB_config()
+	// if err != nil {
+	// 	log.Error("Error loading config: " + err.Error())
+	// 	return
+	// }
 	log.Info("Loaded config from DB successfully")
-	fmt.Printf("Config: %+v\n", cg)
+	// fmt.Printf("Config: %+v\n", cg)
 	go internal_server.ListenAndServe()	
 	// proxy_server.ListenAndServe()
 	log.Info("Proxy server is running on port :8080")
-	proxy.StartProxy()
+	proxy.StartProxy(cfg)
 }

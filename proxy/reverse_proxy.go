@@ -11,9 +11,9 @@ import (
 	// "PrismX/logger"
 )
 
-func StartProxy() {
+func StartProxy(cfg *config.Configs) {
 
-	cfg, _ := config.LoadConfig()
+	// cfg, _ := config.LoadConfig()
 	
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("Received request: %s %s\n", r.Method, r.URL.Path)
