@@ -1,14 +1,16 @@
 package controller
 
 import (
+	"PrismX/config"
 	"PrismX/internal/database"
 	"PrismX/internal/models"
 	"PrismX/logger"
 	"context"
 	"encoding/json"
+
 	// "fmt"
 	"net/http"
-
+	// "PrismX/config"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -116,6 +118,14 @@ func UpdateConfig(res http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		logger.Instance.Error("DB error updating config: " + err.Error())
 		http.Error(res, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	// Reload config on update to ensure changes take effect immediately
+	_, err = config.LoadConfig(id)
+
+	if err != nil {
+		logger.Instance.Error("Config reload failed: " + err.Error())
+		http.Error(res, "updated DB but failed to reload config", http.StatusInternalServerError)
 		return
 	}
 	json.NewEncoder(res).Encode(result)

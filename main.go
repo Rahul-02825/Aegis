@@ -29,7 +29,8 @@ func main() {
 
 	log.Info("Initialize configurations")
 
-	cfg,err:=config.LoadConfig("69e275e4bf8504b6b004cf0b")
+	//----------------------------------user loaded --------------------------------
+	cfg,err:=config.LoadConfig("69e28350047ff4fad13b3308")
 	if err != nil {
 		log.Error("Error loading config: " + err.Error())
 		return

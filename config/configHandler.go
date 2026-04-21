@@ -38,9 +38,11 @@ type server struct{
 	count int
 }
 
-var cfg *Configs
-var once sync.Once
 
+var (
+	cfg *Configs
+	mu  sync.RWMutex
+)
 // Dummy configuration for now
 // func LoadConfig() (*config, error) {
 
@@ -104,9 +106,13 @@ func LoadConfig(id string) (*Configs, error) {
 		return nil, err
 	}
 
-	cfg := convertToRuntimeConfig(dbConfig)
+	newCfg := convertToRuntimeConfig(dbConfig)
 
-	return cfg, nil
+	mu.Lock()
+	cfg = newCfg
+	mu.Unlock()
+
+	return newCfg, nil
 }
 
 func convertToRuntimeConfig(db models.Config) *Configs {
@@ -158,4 +164,10 @@ func(c *Configs) GetServerCount() int{
 
 func(c * Configs) GetLbtype(service_name string) string{
 	return c.upstream.servers[service_name].lbmethod
+}
+
+func GetConfig() *Configs {
+	mu.RLock()
+	defer mu.RUnlock()
+	return cfg
 }
