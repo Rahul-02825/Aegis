@@ -164,7 +164,7 @@ For every incoming request to the proxy:
 - `GET /getConfigs[?id=...]` — list all configs, or fetch one by id
 - `PUT /updateConfig?id=...` — `$set` partial update on a `Config` document, **then immediately calls `config.LoadConfig(id)` again** to hot-reload the in-memory runtime config used by the proxy
 
-  ⚠️ Note: load balancers are **not** rebuilt on config reload — `loadBalancer.InitLoadBalancer` is guarded by `sync.Once` and only ever runs once at startup, so adding/removing upstream servers via `updateConfig` updates `config.GetConfig()` but does **not** currently propagate to the live hash rings used by the proxy.
+  Note: load balancers are **not** rebuilt on config reload — `loadBalancer.InitLoadBalancer` is guarded by `sync.Once` and only ever runs once at startup, so adding/removing upstream servers via `updateConfig` updates `config.GetConfig()` but does **not** currently propagate to the live hash rings used by the proxy.
 
 - `POST /createuser`, `GET /getusers`, `GET /getuser?id=...`, `PUT /updateuser?id=...` — basic user CRUD, no auth/hashing yet
 
